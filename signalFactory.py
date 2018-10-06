@@ -56,7 +56,6 @@ class SignalFactory():
 
 		return (sig.T).squeeze();
 
-
 	def discreteCase(self,dis,jumps,show=False):
 		"""
 		function to generate a signal and its noised coounterpart
@@ -149,6 +148,7 @@ class SignalFactory():
 		"""
 		dis=np.zeros(disNum+1)
 		dis[1:]=sorted(np.random.choice(np.arange(4,self.size),size=disNum,replace=False))
+
 		jump=np.zeros(disNum+1)
 		jump[0]=100; jump[1:]=10
 		sig=self._discreteSignal(dis,jump)
@@ -158,29 +158,30 @@ class SignalFactory():
 
 		return sig,nois
 
-	def randomCase(self,x0=100 ,minPart=10,maxDis=10,p=0.96,show=False):
+	def randomCase(self,x0=100,minPart=10,minJump=10,p=0.03,show=False):
 		"""
 		Generate a random case respecting that the number of discontinuities
 		is inferior to maxDis and the jumps are also inferior to maxJumps
+		Input:
+		x0: initial value of the first plateau
+
+		minJump= minimum jump (useful to assure convergence)
+		p=  probability of a break
 		"""
-		sig=np.zeros(self.size)
-		#randomly computing	 the number of discontinuities
-		breaks=np.random.uniform(size=self.size)>0.9
-		jumps=np.random.uniform(low=maxDis,high=2*maxDis,size=self.size)
-		signs=np.random.uniform(size=self.size)>0.5
+		sig=x0*np.ones(self.size)
+		n=len(sig)
+		breaks=np.random.uniform(size=n)<p;
+		#ides of the breaks
+		ids=np.where(breaks==True)[0];
+		print(type(ids))
+		jumps=np.random.uniform(low=minJump,high=2*minJump,size=ids.shape)
+		signs=np.random.uniform(size=ids.shape)>0.7;
 		jumps[signs]=-jumps[signs]
 
-		sig[0]=x0;
-		partLenght=1;
-		for i in range(1,self.size):
-			if(breaks[i] and partLenght>minPart):
-				sig[i]=sig[i-1]+jumps[i]
-				partLenght=0;
-			else:
-				sig[i]=sig[i-1]
-				partLenght+=1
-
-
+		for i in range(len(jumps)-1):
+			sig[ids[i]:ids[i+1]]=x0+jumps[i];
+			x0+=jumps[i];
+		sig[ids[-1]:]=x0+jumps[-1];
 		#nois=sig+np.random.normal(size=self.size,scale=self.sigma)
 		nois=sig+np.random.laplace(size=self.size,scale=self.sigma)
 		if(show):

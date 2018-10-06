@@ -29,17 +29,24 @@ def gaussian_matrix(n,l,sigma=1):
             mat=mat+np.diag(K[i]*np.ones(n-i),i)+np.diag(K[i]*np.ones(n-i),-i)
     return mat
 
+def mean_kernel(l):
+	"""
+	mean kenel
+	"""
+	V=np.arange(l+1,0,-1)
+	return V
+
 def mean_matrix(n,l):
     """
     function to return the matrix associate to the moving mean operator
     """
 
+    K=mean_kernel(l);
     mat=np.zeros((n,n));
-    v=1./(2*l+1);
+
     for i in range(l):
         if(i==0):
-            mat=mat+np.diag(v*np.ones((n)));
+            mat=mat+np.diag(K[i]*np.ones(n-i));
         else:
-            mat=mat+np.diag(v*np.ones(n-i),i)+np.diag(np.ones(n-i),-i)
-
+            mat=mat+np.diag(K[i]*np.ones(n-i),i)+np.diag(K[i]*np.ones(n-i),-i)
     return mat
