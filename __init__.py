@@ -4,3 +4,6 @@ import ebs.py
 import da_denoisers.py
 import benchmarker.py
 import dps.py
+
+#edge Detection
+from edgeDetection import bsds
